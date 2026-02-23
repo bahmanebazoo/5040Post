@@ -8,6 +8,7 @@ import pandas as pd
 
 from post_analyzer.config import AppConfig
 from post_analyzer.loaders import CallLoader, PanelLoader
+from post_analyzer.processors.last_day_processor import LastDayProcessor
 from post_analyzer.processors import (
     DailyProcessor,
     DailyToDataFrame,
@@ -46,6 +47,15 @@ class PostAnalyzerApp:
             self._config, daily_records, self._scorer
         ).process()
 
+        print("\n[App] ساخت شیت عملکرد تک‌روزه...")
+        last_day_proc = LastDayProcessor()
+        df_last_day = last_day_proc.process(df_daily)
+        # if df_last_day is not None:
+        #     sheets['عملکرد تک‌روزه'] = df_last_day
+        #     print("[App] ✅ شیت 'عملکرد تک‌روزه' اضافه شد.")
+        # else:
+        #     print("[App] ⚠️ شیت عملکرد تک‌روزه ساخته نشد.")
+
         # 5. عملکرد تک‌پارامتری
         df_single = self._build_single_param(df_operators)
 
@@ -53,6 +63,7 @@ class PostAnalyzerApp:
         ExcelExporter(self._config.output_file).export(
             sheets={
                 "گزارش روزانه": df_daily,
+                "عملکرد تک‌روزه": df_last_day,
                 "عملکرد اپراتورها": df_operators,
                 "عملکرد تک‌پارامتری": df_single,
             },
