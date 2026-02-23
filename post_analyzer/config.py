@@ -61,6 +61,7 @@ class AppConfig:
     input_file: str = '../post.xlsx'
     output_file: str = '../post_report.xlsx'
     target_operators: List[str] = field(default_factory=lambda: [
+        'زهرا فرشباف',
         'افشین دلبسته',
         'افسانه جوادی',
         'افسانه عسکری بقرآبادی',

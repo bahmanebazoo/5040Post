@@ -42,8 +42,8 @@ class ExcelStyle:
     )
 
     # ── کلمات کلیدی برای فرمت‌دهی خودکار ──
-    PERCENT_KEYWORDS = ['نسبت', 'درصد', '(%)']
-    TIME_KEYWORDS = ['ساعت']
+    PERCENT_KEYWORDS = ["نسبت", "درصد", "(%)"]
+    TIME_KEYWORDS = ["ساعت"]
 
     @classmethod
     def apply_to_sheet(cls, ws: Worksheet, has_total_row: bool = False):
@@ -74,7 +74,7 @@ class ExcelStyle:
     def _style_data_rows(cls, ws: Worksheet, max_row: int, max_col: int, has_total_row: bool):
         last_data_row = (max_row - 1) if has_total_row else max_row
         for row in range(2, last_data_row + 1):
-            is_even = (row % 2 == 0)
+            is_even = row % 2 == 0
             fill = cls.EVEN_FILL if is_even else cls.ODD_FILL
             for col in range(1, max_col + 1):
                 cell = ws.cell(row=row, column=col)
@@ -108,14 +108,14 @@ class ExcelStyle:
     @classmethod
     def _apply_column_formats(cls, ws: Worksheet, max_row: int, max_col: int):
         for col in range(1, max_col + 1):
-            header_val = str(ws.cell(row=1, column=col).value or '')
+            header_val = str(ws.cell(row=1, column=col).value or "")
             is_percent = any(kw in header_val for kw in cls.PERCENT_KEYWORDS)
             is_time = any(kw in header_val for kw in cls.TIME_KEYWORDS)
 
             if is_percent:
                 for row in range(2, max_row + 1):
                     cell = ws.cell(row=row, column=col)
-                    cell.number_format = '0.00'
+                    cell.number_format = "0.00"
                     cell.alignment = cls.CENTER_ALIGN
             elif is_time:
                 for row in range(2, max_row + 1):

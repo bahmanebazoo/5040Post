@@ -9,6 +9,7 @@ def main():
         input_file='../post.xlsx',
         output_file='../post_report.xlsx',
         target_operators=[
+            'زهرا فرشباف',
             'افشین دلبسته',
             'افسانه جوادی',
             'افسانه عسکری بقرآبادی',
