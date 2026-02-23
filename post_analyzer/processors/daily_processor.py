@@ -1,3 +1,5 @@
+# post_analyzer/processors/daily_processor.py
+
 """
 پردازشگر محاسبات روزانه (گام‌های 1 تا 7).
 Single Responsibility: فقط محاسبات سطح روز/اپراتور.
@@ -23,10 +25,10 @@ from ..utils.date_utils import JalaliDateUtils
 class DailyProcessor(BaseProcessor):
 
     def __init__(
-        self,
-        config: AppConfig,
-        df_call: pd.DataFrame,
-        panel_data: Dict[str, Tuple[pd.DataFrame, PanelColumns]],
+            self,
+            config: AppConfig,
+            df_call: pd.DataFrame,
+            panel_data: Dict[str, Tuple[pd.DataFrame, PanelColumns]],
     ):
         self._config = config
         self._df_call = df_call
@@ -52,11 +54,11 @@ class DailyProcessor(BaseProcessor):
     # ----- private -----
 
     def _process_one_day(
-        self, operator: str, date_dash: str, date_slash: str
+            self, operator: str, date_dash: str, date_slash: str
     ) -> Optional[DailyRecord]:
         mask = (
-            (self._df_call['تماس گیرنده'] == operator)
-            & (self._df_call['تاریخ_شمسی'] == date_slash)
+                (self._df_call['تماس گیرنده'] == operator)
+                & (self._df_call['تاریخ_شمسی'] == date_slash)
         )
         df_day = self._df_call[mask].copy()
 
@@ -73,6 +75,12 @@ class DailyProcessor(BaseProcessor):
 
         no_call_invoices = max(0, panel_day.total_review - unique_mobiles)
 
+        # استخراج ساعت اولین تماس (کل تماس‌ها)
+        first_call_time = self._get_first_call_time(df_day)
+
+        # ✅ استخراج ساعت اولین تماس پاسخ داده شده
+        first_answered_time = self._get_first_answered_time(df_day)
+
         return DailyRecord(
             operator=operator,
             date=date_slash,
@@ -84,7 +92,53 @@ class DailyProcessor(BaseProcessor):
             status_counts=status_counts,
             approved_count=panel_day.approved_count,
             rejected_count=panel_day.rejected_count,
+            first_call_time=first_call_time,
+            first_answered_time=first_answered_time,
         )
+
+    def _get_first_call_time(self, df_day: pd.DataFrame) -> str:
+        """استخراج ساعت اولین تماس (هر وضعیتی)"""
+        if df_day.empty:
+            return "---"
+
+        first_time = df_day.iloc[0]['زمان_اعلام_dt']
+
+        if pd.isna(first_time):
+            return "---"
+
+        try:
+            return first_time.strftime("%H:%M:%S")
+        except Exception:
+            return str(first_time)
+
+    # ✅ متد جدید
+    def _get_first_answered_time(self, df_day: pd.DataFrame) -> str:
+        """
+        استخراج ساعت اولین تماس با وضعیت "پاسخ داده شده".
+        df_day قبلاً بر اساس زمان_اعلام_dt مرتب شده.
+
+        Returns:
+            str: ساعت به فرمت "HH:MM:SS" یا "---"
+        """
+        if df_day.empty:
+            return "---"
+
+        # فیلتر فقط تماس‌های پاسخ داده شده
+        df_answered = df_day[df_day['وضعیت تماس'] == 'پاسخ داده']
+
+        if df_answered.empty:
+            return "---"
+
+        # چون df_day قبلاً sort شده، اولین ردیف = زودترین تماس پاسخ داده
+        first_time = df_answered.iloc[0]['زمان_اعلام_dt']
+
+        if pd.isna(first_time):
+            return "---"
+
+        try:
+            return first_time.strftime("%H:%M:%S")
+        except Exception:
+            return str(first_time)
 
     def _compute_gaps(self, df_day: pd.DataFrame) -> GapStatistics:
         """محاسبه فاصله بین تماس‌ها (گام 2)"""

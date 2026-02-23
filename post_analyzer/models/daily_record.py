@@ -1,6 +1,9 @@
+# post_analyzer/models/daily_record.py
+
 """مدل رکورد روزانه عملکرد یک اپراتور"""
 
 from dataclasses import dataclass
+from typing import Optional
 from .gap_statistics import GapStatistics
 from .status_counts import StatusCounts
 
@@ -17,6 +20,8 @@ class DailyRecord:
     status_counts: StatusCounts
     approved_count: int
     rejected_count: int
+    first_call_time: Optional[str] = None    # ✅ ساعت اولین تماس
+    first_answered_time: Optional[str] = None    # ✅ ساعت اولین تماس پاسخ داده
 
     @property
     def call_to_invoice_ratio(self) -> float:
