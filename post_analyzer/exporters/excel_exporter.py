@@ -44,6 +44,9 @@ class ExcelExporter(BaseExporter):
                     has_total = sheet_name in self.TOTAL_ROW_SHEETS
                     ExcelStyle.apply_to_sheet(ws, has_total_row=has_total)
                     print(f"  [Style] ✅ {sheet_name}")
+            for sheet_name in writer.sheets:
+                writer.sheets[sheet_name].sheet_view.rightToLeft = True
+                print(f"  [RTL] ✅ {sheet_name}")
 
             # ── 3) نمودارها ──
             if df_daily is not None and df_operators is not None:
@@ -53,6 +56,10 @@ class ExcelExporter(BaseExporter):
                     from post_analyzer.charts.chart_manager import ChartManager
                     chart_manager = ChartManager(wb, df_daily, df_operators)
                     chart_manager.create_all_charts()
+
+                    for ws in wb.worksheets:
+                        ws.sheet_view.rightToLeft = True
+
                 except Exception as e:
                     print(f"  [Charts] ❌ خطا در ساخت نمودارها: {e}")
                     import traceback
